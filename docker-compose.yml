@@ -1,0 +1,59 @@
+version: '3.7'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - MONGO_URI=mongodb+srv://YouOg:113200Yh@jacoapp.6kltp.mongodb.net/jacoshop?retryWrites=true&w=majority
+      - JWT_SECRET=abc123
+      - PAYPAL_CLIENT_ID=AWz4a5fXCuJtb1s-j7sL9jFdoe6cEtp4MjPeqkhSweRxep1K-nWKpikkH2k3hPo0km6Lkatpk0mtoJ-g
+    image: myapp-backend
+    container_name: myapp-node-backend
+    command: /usr/src/app/node_modules/.bin/nodemon server --ignore client
+    volumes:
+      - ./backend/:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - '5000:5000'
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+  mongo:
+    image: mongo
+    volumes:
+      - data-volume:/data/db
+    ports:
+      - '27017:27017'
+    networks:
+      - app-network
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: myapp-frontend
+    container_name: myapp-react-frontend
+    command: npm start
+    volumes:
+      - ./frontend/:/usr/app
+      - /usr/app/node_modules
+    depends_on:
+      - backend
+    ports:
+      - '3000:3000'
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  data-volume:
+  node_modules:
+  web-root:
+    driver: local
